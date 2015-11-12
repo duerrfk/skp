@@ -40,7 +40,7 @@ EXTENDS Integers, Sequences
 CONSTANT N, 
 
 \* Artificial limit to the token number.
-\* Without this limit , token numbers might grow infinitely,
+\* Without this limit, token numbers might grow infinitely,
 \* which makes it impossible to model-check the algorithm due to
 \* an infinite number of different states. However, this change 
 \* will make the algorithm non starvation-free (as can be shown
@@ -548,6 +548,11 @@ Spec == /\ Init /\ [][Next]_vars
 \* For mutual exclusion, process 1 and process 2 must never be in the 
 \* critical section at the same time.
 MutualExclusion == [] \A proc1, proc2 \in 1..N : (proc1 # proc2) => ~ (pc[proc1] = "p8" /\ pc[proc2] = "p8")
+
+\*** No deadlock
+\* If all processes want to enter the critical section, eventually
+\* one of these processes will enter the critical section.
+NoDeadlock == (\A proc1 \in 1..N : pc[proc1] = "p2") ~> (\E proc2 \in 1..N : pc[proc2] = "p8")
 
 \*** No starvation
 \* If one process wants to enter the critical section, this process will 

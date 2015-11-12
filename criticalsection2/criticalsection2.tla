@@ -206,8 +206,8 @@ Next == P \/ Q
            \/ (\E self \in ProcSet: NCS(self))
 
 Spec == /\ Init /\ [][Next]_vars
-        /\ WF_vars(P) /\ WF_vars(NCS(1))
-        /\ WF_vars(Q) /\ WF_vars(NCS(2))
+        /\ SF_vars(P) /\ SF_vars(NCS(1))
+        /\ SF_vars(Q) /\ SF_vars(NCS(2))
 
 \* END TRANSLATION
 
@@ -234,6 +234,6 @@ NoStarvation == /\ NoStarvationP
                 /\ NoStarvationQ
 
 \* Assume weakly fair scheduling of all commands
-(* PlusCal options (wf) *)
+(* PlusCal options (sf) *)
 
 =============================================================================

@@ -246,12 +246,15 @@ MutualExclusion == [] ~ (pc[1] = "p6" /\ pc[2] = "q6")
 
 \*** Deadlock free
 \* If both processes want to enter the critical section, eventually one will
-\* enter the critical section. For a deadlock, P and Q must (busy) wait for
-\* each other infinitely in the loops p3-p5 and q3-q5. Thus, there must be 
-\* a time when both wantp and wantq are true forever.
-\* <>[] means "eventually (<>) for always ([])"
-NoDeadlock == ~ <>[] (wantp = TRUE /\ wantq = TRUE)
- 
+\* enter the critical section.
+\* Actually, both processes are still making progress in the while loop.
+\* But it is possible that none of them ever leaves the loop.
+NoDeadlock == /\ pc[1] = "p2"
+              /\ pc[2] = "q2"
+              ~>
+              \/ pc[1] = "p6"
+              \/ pc[2] = "q6"
+
 \*** Starvation free
 \* If P waits to enter the critical section, P will eventually enter
 \* the critical section. The same must hold for Q.

@@ -549,6 +549,11 @@ Spec == /\ Init /\ [][Next]_vars
 \* critical section at the same time.
 MutualExclusion == [] \A proc1, proc2 \in 1..N : (proc1 # proc2) => ~ (pc[proc1] = "p8" /\ pc[proc2] = "p8")
 
+\*** No deadlock
+\* If all processes want to enter the critical section, eventually
+\* one of these processes will enter the critical section.
+NoDeadlock == (\A proc1 \in 1..N : pc[proc1] = "p2") ~> (\E proc2 \in 1..N : pc[proc2] = "p8")
+
 \*** No starvation
 \* If one process wants to enter the critical section, this process will 
 \* eventually enter the critical section.
