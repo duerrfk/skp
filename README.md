@@ -26,7 +26,7 @@ Algorithm _criticalsection6bakery_ is **Lamport's Bakery algorithm** [2], which 
 
 Algorithm _criticalsection7fastmutex_ is **Lamport's Fast Mutual Exclusion** algorithm for _N_ processes [3]. This algorithm guarantees mutual exclusion, and it is free from deadlocks. However, it trades off starvation freedom for faster entry into the critical section in scenarios without contention: The Fast Mutual Exclusion algorithm requires O(1) operations if only a single process wants to enter the critical section. For a comparison, the Bakery algorithm always requires O(N) operations, also in scenarios without contention (however, the Bakery algorithm is starvation free). 
 
-Algorithm _criticalsection8testset_ uses an atomic test and set operation to guarantee mutual exclusion. This implementation is deadlock free, however, processes might starve.
+Algorithm _criticalsection8testset_ uses an atomic **test and set** operation to guarantee mutual exclusion. This implementation is deadlock free, however, processes might starve.
 
 # License
 
