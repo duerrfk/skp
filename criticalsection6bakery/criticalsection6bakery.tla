@@ -27,11 +27,8 @@
 (*                                                                          *)
 (* However, it is hard to check since it contains an infinite number of     *)
 (* states since token numbers can grow ad infinitum. If we artificially     *)
-(* limit the grows of tokens numbers, the algorithm is not starvation free  *)
-(* anymore as demonstrated through model checking                           *)
-(*                                                                          *)
-(* In the implementation, we only assume atomic access to basic variables   *)
-(* like a single integer or boolean.                                        *)
+(* limit the grows of token numbers, the algorithm is not starvation free   *)
+(* anymore as is demonstrated through model checking.                       *)
 (****************************************************************************)
 
 EXTENDS Integers, Sequences
@@ -158,19 +155,19 @@ MaxTokenNumber
                 };
                 p3c: number[i] := 1 + maxret[self];
                 p4: choosing[self] := FALSE;
-                    otherprocesses := 1..N \ {i};
-                p5: while (otherprocesses # {}) {
-                       \* Choose another random process as j 
-                        with (proc \in otherprocesses) {
-                            j := proc;
-                        };
-                        otherprocesses := otherprocesses \ {j};
-                        p6: await choosing[j] = FALSE;
-                        \* procedure wait() implements the following await 
-                        \* statement:
-                        \* await (number[j] = 0) \/ (number[i] << number[j]) 
-                        p7: call wait(i,j);
-                    };
+                p5a: otherprocesses := 1..N \ {i};
+                p5b: while (otherprocesses # {}) {
+                        \* Choose random process as j 
+                         with (proc \in otherprocesses) {
+                             j := proc;
+                         };
+                         otherprocesses := otherprocesses \ {j};
+                         p6: await choosing[j] = FALSE;
+                         \* procedure wait() implements the following await 
+                         \* statement:
+                         \* await (number[j] = 0) \/ (number[i] << number[j]) 
+                         p7: call wait(i,j);
+                     };
                 p8: skip; \* critical section
                 p9: number[i] := 0; 
             };
@@ -469,23 +466,29 @@ p3c(self) == /\ pc[self] = "p3c"
 
 p4(self) == /\ pc[self] = "p4"
             /\ choosing' = [choosing EXCEPT ![self] = FALSE]
-            /\ otherprocesses' = [otherprocesses EXCEPT ![self] = 1..N \ {i[self]}]
-            /\ pc' = [pc EXCEPT ![self] = "p5"]
+            /\ pc' = [pc EXCEPT ![self] = "p5a"]
             /\ UNCHANGED << number, lesslessret, maxret, stack, isEndless, i__, 
                             j__, numberi__, numberj__, m, k, temp, i_, j_, 
-                            numberi_, numberj_, i, j >>
+                            numberi_, numberj_, i, j, otherprocesses >>
 
-p5(self) == /\ pc[self] = "p5"
-            /\ IF otherprocesses[self] # {}
-                  THEN /\ \E proc \in otherprocesses[self]:
-                            j' = [j EXCEPT ![self] = proc]
-                       /\ otherprocesses' = [otherprocesses EXCEPT ![self] = otherprocesses[self] \ {j'[self]}]
-                       /\ pc' = [pc EXCEPT ![self] = "p6"]
-                  ELSE /\ pc' = [pc EXCEPT ![self] = "p8"]
-                       /\ UNCHANGED << j, otherprocesses >>
-            /\ UNCHANGED << choosing, number, lesslessret, maxret, stack, 
-                            isEndless, i__, j__, numberi__, numberj__, m, k, 
-                            temp, i_, j_, numberi_, numberj_, i >>
+p5a(self) == /\ pc[self] = "p5a"
+             /\ otherprocesses' = [otherprocesses EXCEPT ![self] = 1..N \ {i[self]}]
+             /\ pc' = [pc EXCEPT ![self] = "p5b"]
+             /\ UNCHANGED << choosing, number, lesslessret, maxret, stack, 
+                             isEndless, i__, j__, numberi__, numberj__, m, k, 
+                             temp, i_, j_, numberi_, numberj_, i, j >>
+
+p5b(self) == /\ pc[self] = "p5b"
+             /\ IF otherprocesses[self] # {}
+                   THEN /\ \E proc \in otherprocesses[self]:
+                             j' = [j EXCEPT ![self] = proc]
+                        /\ otherprocesses' = [otherprocesses EXCEPT ![self] = otherprocesses[self] \ {j'[self]}]
+                        /\ pc' = [pc EXCEPT ![self] = "p6"]
+                   ELSE /\ pc' = [pc EXCEPT ![self] = "p8"]
+                        /\ UNCHANGED << j, otherprocesses >>
+             /\ UNCHANGED << choosing, number, lesslessret, maxret, stack, 
+                             isEndless, i__, j__, numberi__, numberj__, m, k, 
+                             temp, i_, j_, numberi_, numberj_, i >>
 
 p6(self) == /\ pc[self] = "p6"
             /\ choosing[j[self]] = FALSE
@@ -499,7 +502,7 @@ p7(self) == /\ pc[self] = "p7"
             /\ /\ i_' = [i_ EXCEPT ![self] = i[self]]
                /\ j_' = [j_ EXCEPT ![self] = j[self]]
                /\ stack' = [stack EXCEPT ![self] = << [ procedure |->  "wait",
-                                                        pc        |->  "p5",
+                                                        pc        |->  "p5b",
                                                         numberi_  |->  numberi_[self],
                                                         numberj_  |->  numberj_[self],
                                                         i_        |->  i_[self],
@@ -528,8 +531,8 @@ p9(self) == /\ pc[self] = "p9"
                             numberi_, numberj_, i, j, otherprocesses >>
 
 Proc(self) == p0(self) \/ p1(self) \/ p2(self) \/ p3a(self) \/ p3b(self)
-                 \/ p3c(self) \/ p4(self) \/ p5(self) \/ p6(self)
-                 \/ p7(self) \/ p8(self) \/ p9(self)
+                 \/ p3c(self) \/ p4(self) \/ p5a(self) \/ p5b(self)
+                 \/ p6(self) \/ p7(self) \/ p8(self) \/ p9(self)
 
 Next == (\E self \in ProcSet:  \/ NCS(self) \/ lessless(self) \/ max(self)
                                \/ wait(self))
