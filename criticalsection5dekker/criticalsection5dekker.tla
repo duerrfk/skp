@@ -47,53 +47,52 @@ EXTENDS Integers, Sequences
 	\* Non-deterministically choose whether the procedure will
 	\* be endless or finite.
         ncs0: with (x \in {0,1}) {
-            isEndless := x;
-        };
+                  isEndless := x;
+              };
         ncs1: if (isEndless = 1) {
-            ncs2: while (TRUE) {
-                ncs3: skip;
-            }
-        } else {
-            ncs4: return;
-        }
+                  ncs2: while (TRUE) {
+                      ncs3: skip;
+                  }
+              } else {
+                  ncs4: return;
+              }
     }
 
     \* First process (name P, pid 1)
     process(P = 1) {
         p0: while (TRUE) {
-            p1: call NCS(); \* non-critical section
-            p2: wantp := TRUE; 
-            p3: while (wantq = TRUE) {
-                p4: if (turn = 2) {
-                    p5: wantp := FALSE;
-                    p6: await turn = 1;
-                    p7: wantp := TRUE;
-                };
-            };
-	    p8: skip; \* critical section
-	    p9: turn := 2; 
-            p10: wantp := FALSE;
-        } 
+                p1: call NCS(); \* non-critical section
+                p2: wantp := TRUE; 
+                p3: while (wantq = TRUE) {
+                        p4: if (turn = 2) {
+                                p5: wantp := FALSE;
+                                p6: await turn = 1;
+                                p7: wantp := TRUE;
+                            };
+                    };
+	        p8: skip; \* critical section
+	        p9: turn := 2; 
+                p10: wantp := FALSE;
+            } 
     }
 
     \* First process (name P, pid 1)
     process(Q = 2) {
         q0: while (TRUE) {
-            q1: call NCS(); \* non-critical section
-            q2: wantq := TRUE; 
-            q3: while (wantp = TRUE) {
-                q4: if (turn = 1) {
-                    q5: wantq := FALSE;
-                    q6: await turn = 2;
-                    q7: wantq := TRUE;
-                };
-            };
-	    q8: skip; \* critical section
-	    q9: turn := 1; 
-            q10: wantq := FALSE;
-        } 
+                q1: call NCS(); \* non-critical section
+                q2: wantq := TRUE; 
+                q3: while (wantp = TRUE) {
+                        q4: if (turn = 1) {
+                                q5: wantq := FALSE;
+                                q6: await turn = 2;
+                                q7: wantq := TRUE;
+                            };
+                    };
+	        q8: skip; \* critical section
+	        q9: turn := 1; 
+                q10: wantq := FALSE;
+            } 
     }
-
 
 }
 
