@@ -22,9 +22,11 @@ The tools are implemented in Java. For your convenience, we have provided script
 
 The algorithms _criticalsection1_ to _criticalsection4_ are initial attempts to solve the critical section problem. Intentionally, all of these examples have some problem and fail to implement at least one of the desired properties of the critical section problem (mutual exclusion, freedom from deadlocks or starvation). These imperfect algorithms are used to demonstrate how model checking can help to reveal these problems.
 
-Algorithm _criticalsection5dekker_ is Dekker's algorithm, which provides a complete solution for the critical section problem with two processes.
+Algorithm _criticalsection5dekker_ is **Dekker's algorithm**, which provides a complete solution for the critical section problem guaranteeing mutual exclusion, freedom from deadlocks, and freedom from starvation with two processes.
 
-Algorithm _criticalsection5bakery_ is Lamport's Bakery algorithm for _n_ processes. This example is used to demonstrate the limitations of model checking. The Bakery algorithm has an infinite number of different states since token numbers can theoretically grow infinitely. Thus, model checking will never reach an end where all states have been checked. If we artificially limit token numbers to a pre-defined maximum, the algorithm is not starvation free anymore, as can be demonstrated with model checking. 
+Algorithm _criticalsection6bakery_ is **Lamport's Bakery algorithm**, which guarantees mutual exclusion, freedom from deadlocks, and freedom from starvation for _N_ processes. This example is used to demonstrate the limitations of model checking. The Bakery algorithm might go through an infinite number of different states since token numbers can theoretically grow infinitely. Thus, model checking will never reach an end where all states have been checked. If we artificially limit token numbers to a pre-defined maximum value, the algorithm is not starvation free anymore, as can be demonstrated with model checking. 
+
+Algorithm _criticalsection7fastmutex_ is **Lamport's Fast Mutual Exclusion** algorithm for _N_ processes. This algorithm guarantees mutual exclusion, and it is free from deadlocks. However, it trades off starvation freedom for faster entry into the critical section in scenarios without contention: The Fast Mutual Exclusion algorithm requires O(1) operations if only a single process wants to enter the critical section. For a comparison, the Bakery algorithm always requires O(N) operations, also in scenarios without contention (however, the Bakery algorithm is starvation free). 
 
 # License
 
