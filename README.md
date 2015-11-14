@@ -1,6 +1,6 @@
 This repository contains PlusCal [1] formulations of various solutions of the critical section problem like Lamport's Fast Mutual Exclusion algorithm or Dekker's algorithm to perform model checking on these algorithms. Originally, these examples were written for the lecture _System concepts and programming_ at University of Stuttgart, to demonstrate how to verify concurrent algorithms using model checking to verify desired properties like mutual exclusion, freedom from deadlocks, and freedom from starvation. 
 
-Some algorithms were taken from the popular text book _Principles of Concurrent and Distributed Programming (second edition)_ by M. Ben-Ari. Examples include Dekker's algorithm and Lamport's Bakery Algorithm as well as several teaching examples to demonstrate different problems and how to find them using model checking. References to the algorithms described in the book can be found in the source code (.tla files).
+Examples include Dekker's algorithm and Lamport's Bakery and Fast Mutual Exclusion Algorithm as well as several teaching examples from the popular text book _Principles of Concurrent and Distributed Programming (second edition)_ by M. Ben-Ari to demonstrate different problems and how to find them using model checking. References to the algorithms described in the papers and book can be found in the source code (.tla files).
 
 # Prerequisite
 
@@ -32,4 +32,4 @@ All implementation are covered by the liberal Apache 2 license hoping these exam
 
 # References
 
-    [1] Leslie Lamport: The PlusCal Algorithm Language. Theoretical Aspects of Computing (ICTAC 2009), Lecture Notes in Computer Science 5684, pp. 36-60, 2009
+[1] Leslie Lamport: The PlusCal Algorithm Language. Theoretical Aspects of Computing (ICTAC 2009), Lecture Notes in Computer Science 5684, pp. 36-60, 2009
