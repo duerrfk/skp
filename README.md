@@ -1,8 +1,6 @@
-# What can be found here?
+This repository contains PlusCal [1] formulations of various solutions of the critical section problem like Lamport's Fast Mutual Exclusion algorithm or Dekker's algorithm to perform model checking on these algorithms. Originally, these examples were written for the lecture _System concepts and programming_ at University of Stuttgart, to demonstrate how to verify concurrent algorithms using model checking to verify desired properties like mutual exclusion, freedom from deadlocks, and freedom from starvation. 
 
-This repository contains a number of algorithm descriptions for the PlusCal algorithm language [1]. These examples were written for the lecture _System concepts and programming_ at University of Stuttgart, to demonstrate how to verify concurrent algorithms using model checking. 
-
-The examples focus on the critical section problem (mutual exclusion, freedom from deadlocks and starvation). The algorithms were taken from the popular text book _Principles of Concurrent and Distributed Programming (second edition)_ by M. Ben-Ari. Examples include Dekker's algorithm and Lamport's Bakery Algorithm as well as several teaching examples to demonstrate different problems and how to find them using model checking. References to the algorithms described in the book can be found in the source code (.tla files).
+Some algorithms were taken from the popular text book _Principles of Concurrent and Distributed Programming (second edition)_ by M. Ben-Ari. Examples include Dekker's algorithm and Lamport's Bakery Algorithm as well as several teaching examples to demonstrate different problems and how to find them using model checking. References to the algorithms described in the book can be found in the source code (.tla files).
 
 # Prerequisite
 
@@ -15,12 +13,12 @@ The tools are implemented in Java. For your convenience, we have provided script
 # Performing Model Checking
 
 1. Change to the directory of the algorithm you want to check.
-2. Translate the PlusCal algorithm description to TLA+ by calling the script ```compile.sh```.
+2. Translate the PlusCal formulation to TLA+ by calling the script ```compile.sh```.
 3. Start model checking using the TLC model checker by calling the script ```check.sh```.
 
 # Algorithms
 
-The algorithms _criticalsection1_ to _criticalsection4_ are initial attempts to solve the critical section problem. Intentionally, all of these examples have some problem and fail to implement at least one of the desired properties of the critical section problem (mutual exclusion, freedom from deadlocks or starvation). These imperfect algorithms are used to demonstrate how model checking can help to reveal these problems.
+The algorithms _criticalsection1_ to _criticalsection4_ are initial attempts to solve the critical section problem. Intentionally, all of these examples have some problem and fail to implement at least one of the desired properties of the critical section problem (mutual exclusion, freedom from deadlocks, freedom from starvation). These imperfect algorithms are used to demonstrate how model checking can help to reveal these problems.
 
 Algorithm _criticalsection5dekker_ is **Dekker's algorithm**, which provides a complete solution for the critical section problem guaranteeing mutual exclusion, freedom from deadlocks, and freedom from starvation with two processes.
 
