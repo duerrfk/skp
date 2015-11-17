@@ -40,8 +40,8 @@ CONSTANT N,
 \* Without this limit, token numbers might grow infinitely,
 \* which makes it impossible to model-check the algorithm due to
 \* an infinite number of different states. However, this change 
-\* will make the algorithm non starvation-free (as can be shown
-\* through model checking). 
+\* will make the algorithm non starvation-free and mutual exclusion might 
+\* be violated (as can be shown through model checking). 
 MaxTokenNumber
 
 (*
@@ -113,7 +113,7 @@ MaxTokenNumber
        	          k := k+1;     
         };
         max4: maxret[self] := m;
-              return;  
+        max5: return;  
     }
 
    \* Implentation of the following wait statement:
@@ -126,9 +126,9 @@ MaxTokenNumber
        wait1: while (TRUE) {
                   wait2: numberi_ := number[i_];
                   wait3: numberj_ := number[j_];
-                         call lessless(i_,j_);
-                  wait4: if (numberi_ = 0 \/ lesslessret[i_]) {
-                             return;
+                  wait4: call lessless(i_,j_);
+                  wait5: if (numberj_ = 0 \/ lesslessret[i_] = TRUE) {
+                             wait6: return;
                          };
               };
    }
@@ -147,13 +147,14 @@ MaxTokenNumber
                 \* token number. Without this statement, token numbers 
                 \* might grow infinitely, which makes it impossible to 
                 \* model-check the algorithm due to an infinite number of 
-                \* different states. However, this change will make the 
-                \* algorithm non-starvation-free (as can be shown through 
-                \* model checking).
-                p3b: if (maxret[self] >= MaxTokenNumber) {
-                    \* After next line: number[i] = MaxTokenNumber
-                    maxret[self] := MaxTokenNumber-1;
-                };
+                \* different states. However, this change makes the algorithm 
+                \* non starvation-free and mutual exclusion might 
+                \* be violated (as can be shown through model checking by
+                \* removing the comments of p3b). 
+\*                p3b: if (maxret[self] >= MaxTokenNumber) {
+\*                    \* After next line: number[i] = MaxTokenNumber
+\*                    maxret[self] := MaxTokenNumber-1;
+\*                };
                 p3c: number[i] := 1 + maxret[self];
                 p4: choosing[self] := FALSE;
                 p5a: otherprocesses := 1..N \ {i};
@@ -349,16 +350,23 @@ max3(self) == /\ pc[self] = "max3"
 
 max4(self) == /\ pc[self] = "max4"
               /\ maxret' = [maxret EXCEPT ![self] = m[self]]
+              /\ pc' = [pc EXCEPT ![self] = "max5"]
+              /\ UNCHANGED << choosing, number, lesslessret, stack, isEndless, 
+                              i__, j__, numberi__, numberj__, m, k, temp, i_, 
+                              j_, numberi_, numberj_, i, j, otherprocesses >>
+
+max5(self) == /\ pc[self] = "max5"
               /\ pc' = [pc EXCEPT ![self] = Head(stack[self]).pc]
               /\ m' = [m EXCEPT ![self] = Head(stack[self]).m]
               /\ k' = [k EXCEPT ![self] = Head(stack[self]).k]
               /\ temp' = [temp EXCEPT ![self] = Head(stack[self]).temp]
               /\ stack' = [stack EXCEPT ![self] = Tail(stack[self])]
-              /\ UNCHANGED << choosing, number, lesslessret, isEndless, i__, 
-                              j__, numberi__, numberj__, i_, j_, numberi_, 
+              /\ UNCHANGED << choosing, number, lesslessret, maxret, isEndless, 
+                              i__, j__, numberi__, numberj__, i_, j_, numberi_, 
                               numberj_, i, j, otherprocesses >>
 
 max(self) == max1(self) \/ max2(self) \/ max3(self) \/ max4(self)
+                \/ max5(self)
 
 wait1(self) == /\ pc[self] = "wait1"
                /\ pc' = [pc EXCEPT ![self] = "wait2"]
@@ -376,10 +384,16 @@ wait2(self) == /\ pc[self] = "wait2"
 
 wait3(self) == /\ pc[self] = "wait3"
                /\ numberj_' = [numberj_ EXCEPT ![self] = number[j_[self]]]
+               /\ pc' = [pc EXCEPT ![self] = "wait4"]
+               /\ UNCHANGED << choosing, number, lesslessret, maxret, stack, 
+                               isEndless, i__, j__, numberi__, numberj__, m, k, 
+                               temp, i_, j_, numberi_, i, j, otherprocesses >>
+
+wait4(self) == /\ pc[self] = "wait4"
                /\ /\ i__' = [i__ EXCEPT ![self] = i_[self]]
                   /\ j__' = [j__ EXCEPT ![self] = j_[self]]
                   /\ stack' = [stack EXCEPT ![self] = << [ procedure |->  "lessless",
-                                                           pc        |->  "wait4",
+                                                           pc        |->  "wait5",
                                                            numberi__ |->  numberi__[self],
                                                            numberj__ |->  numberj__[self],
                                                            i__       |->  i__[self],
@@ -389,24 +403,31 @@ wait3(self) == /\ pc[self] = "wait3"
                /\ numberj__' = [numberj__ EXCEPT ![self] = defaultInitValue]
                /\ pc' = [pc EXCEPT ![self] = "ll1"]
                /\ UNCHANGED << choosing, number, lesslessret, maxret, 
-                               isEndless, m, k, temp, i_, j_, numberi_, i, j, 
+                               isEndless, m, k, temp, i_, j_, numberi_, 
+                               numberj_, i, j, otherprocesses >>
+
+wait5(self) == /\ pc[self] = "wait5"
+               /\ IF numberj_[self] = 0 \/ lesslessret[i_[self]] = TRUE
+                     THEN /\ pc' = [pc EXCEPT ![self] = "wait6"]
+                     ELSE /\ pc' = [pc EXCEPT ![self] = "wait1"]
+               /\ UNCHANGED << choosing, number, lesslessret, maxret, stack, 
+                               isEndless, i__, j__, numberi__, numberj__, m, k, 
+                               temp, i_, j_, numberi_, numberj_, i, j, 
                                otherprocesses >>
 
-wait4(self) == /\ pc[self] = "wait4"
-               /\ IF numberi_[self] = 0 \/ lesslessret[i_[self]]
-                     THEN /\ pc' = [pc EXCEPT ![self] = Head(stack[self]).pc]
-                          /\ numberi_' = [numberi_ EXCEPT ![self] = Head(stack[self]).numberi_]
-                          /\ numberj_' = [numberj_ EXCEPT ![self] = Head(stack[self]).numberj_]
-                          /\ i_' = [i_ EXCEPT ![self] = Head(stack[self]).i_]
-                          /\ j_' = [j_ EXCEPT ![self] = Head(stack[self]).j_]
-                          /\ stack' = [stack EXCEPT ![self] = Tail(stack[self])]
-                     ELSE /\ pc' = [pc EXCEPT ![self] = "wait1"]
-                          /\ UNCHANGED << stack, i_, j_, numberi_, numberj_ >>
+wait6(self) == /\ pc[self] = "wait6"
+               /\ pc' = [pc EXCEPT ![self] = Head(stack[self]).pc]
+               /\ numberi_' = [numberi_ EXCEPT ![self] = Head(stack[self]).numberi_]
+               /\ numberj_' = [numberj_ EXCEPT ![self] = Head(stack[self]).numberj_]
+               /\ i_' = [i_ EXCEPT ![self] = Head(stack[self]).i_]
+               /\ j_' = [j_ EXCEPT ![self] = Head(stack[self]).j_]
+               /\ stack' = [stack EXCEPT ![self] = Tail(stack[self])]
                /\ UNCHANGED << choosing, number, lesslessret, maxret, 
                                isEndless, i__, j__, numberi__, numberj__, m, k, 
                                temp, i, j, otherprocesses >>
 
 wait(self) == wait1(self) \/ wait2(self) \/ wait3(self) \/ wait4(self)
+                 \/ wait5(self) \/ wait6(self)
 
 p0(self) == /\ pc[self] = "p0"
             /\ pc' = [pc EXCEPT ![self] = "p1"]
@@ -435,7 +456,7 @@ p2(self) == /\ pc[self] = "p2"
 
 p3a(self) == /\ pc[self] = "p3a"
              /\ stack' = [stack EXCEPT ![self] = << [ procedure |->  "max",
-                                                      pc        |->  "p3b",
+                                                      pc        |->  "p3c",
                                                       m         |->  m[self],
                                                       k         |->  k[self],
                                                       temp      |->  temp[self] ] >>
@@ -447,16 +468,6 @@ p3a(self) == /\ pc[self] = "p3a"
              /\ UNCHANGED << choosing, number, lesslessret, maxret, isEndless, 
                              i__, j__, numberi__, numberj__, i_, j_, numberi_, 
                              numberj_, i, j, otherprocesses >>
-
-p3b(self) == /\ pc[self] = "p3b"
-             /\ IF maxret[self] >= MaxTokenNumber
-                   THEN /\ maxret' = [maxret EXCEPT ![self] = MaxTokenNumber-1]
-                   ELSE /\ TRUE
-                        /\ UNCHANGED maxret
-             /\ pc' = [pc EXCEPT ![self] = "p3c"]
-             /\ UNCHANGED << choosing, number, lesslessret, stack, isEndless, 
-                             i__, j__, numberi__, numberj__, m, k, temp, i_, 
-                             j_, numberi_, numberj_, i, j, otherprocesses >>
 
 p3c(self) == /\ pc[self] = "p3c"
              /\ number' = [number EXCEPT ![i[self]] = 1 + maxret[self]]
@@ -531,9 +542,9 @@ p9(self) == /\ pc[self] = "p9"
                             i__, j__, numberi__, numberj__, m, k, temp, i_, j_, 
                             numberi_, numberj_, i, j, otherprocesses >>
 
-Proc(self) == p0(self) \/ p1(self) \/ p2(self) \/ p3a(self) \/ p3b(self)
-                 \/ p3c(self) \/ p4(self) \/ p5a(self) \/ p5b(self)
-                 \/ p6(self) \/ p7(self) \/ p8(self) \/ p9(self)
+Proc(self) == p0(self) \/ p1(self) \/ p2(self) \/ p3a(self) \/ p3c(self)
+                 \/ p4(self) \/ p5a(self) \/ p5b(self) \/ p6(self)
+                 \/ p7(self) \/ p8(self) \/ p9(self)
 
 Next == (\E self \in ProcSet:  \/ NCS(self) \/ lessless(self) \/ max(self)
                                \/ wait(self))
