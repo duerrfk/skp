@@ -150,7 +150,8 @@ MaxTokenNumber
                 \* different states. However, this change will make the 
                 \* algorithm non-starvation-free (as can be shown through 
                 \* model checking).
-                p3b: if (maxret[self] = MaxTokenNumber) {
+                p3b: if (maxret[self] >= MaxTokenNumber) {
+                    \* After next line: number[i] = MaxTokenNumber
                     maxret[self] := MaxTokenNumber-1;
                 };
                 p3c: number[i] := 1 + maxret[self];
@@ -448,7 +449,7 @@ p3a(self) == /\ pc[self] = "p3a"
                              numberj_, i, j, otherprocesses >>
 
 p3b(self) == /\ pc[self] = "p3b"
-             /\ IF maxret[self] = MaxTokenNumber
+             /\ IF maxret[self] >= MaxTokenNumber
                    THEN /\ maxret' = [maxret EXCEPT ![self] = MaxTokenNumber-1]
                    ELSE /\ TRUE
                         /\ UNCHANGED maxret
